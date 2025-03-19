@@ -13,3 +13,7 @@ RUN apt-get update \
     && docker-php-ext-install -j$(nproc) zip \
     && docker-php-ext-install -j$(nproc) pgsql \
     && docker-php-ext-install -j$(nproc) pdo_pgsql
+
+WORKDIR /var/www/html
+
+EXPOSE 9000

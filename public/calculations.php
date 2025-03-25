@@ -122,8 +122,6 @@ function calculateProcessingTime($length, $width, $height, $material) {
                 </div>
             </div>
         <?php endif; ?>
-
-        <!-- История расчетов -->
         <div class="<?php echo $product ? 'col-md-6' : 'col-md-12'; ?>">
             <div class="card">
                 <div class="card-header">

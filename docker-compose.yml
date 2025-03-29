@@ -5,26 +5,36 @@ services:
       - ./.docker/conf/nginx/default.conf:/etc/nginx/conf.d/default.conf
       - .:/var/www/html
     ports:
-      - "8080:80"
+      - "8081:80"
     restart: always
     depends_on:
       - php
     networks:
-      - postgres
+      - app_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   php:
     build: .docker
     restart: always
     volumes:
+      - ./.docker/conf/php-fpm/www.conf:/usr/local/etc/php-fpm.d/zzz-www.conf
       - ./.docker/conf/php/php.ini:/usr/local/etc/php/conf.d/php.ini
       - ./.docker/conf/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
       - .:/var/www/html
     networks:
-      - postgres
+      - app_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   composer:
     image: composer
     volumes:
       - .:/app
     command: install
+    networks:
+      - app_network
+
   postgres:
     container_name: postgres_container
     image: postgres
@@ -34,13 +44,18 @@ services:
       POSTGRES_PASSWORD: root
       PGDATA: /data/postgres
     volumes:
-      - postgres:/data/postgres
+      - postgres_data:/data/postgres
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
-      - postgres
+      - app_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d calculator"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
     container_name: pgadmin_container
@@ -50,20 +65,23 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
-      - pgadmin:/var/lib/pgadmin
-
+      - pgadmin_data:/var/lib/pgadmin
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     depends_on:
       - postgres
     networks:
-      - postgres
+      - app_network
     restart: unless-stopped
 
 networks:
-  postgres:
+  app_network:
     driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.0/16
 
 volumes:
-  postgres:
-  pgadmin:
+  postgres_data:
+  pgadmin_data:

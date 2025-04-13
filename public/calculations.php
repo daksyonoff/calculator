@@ -16,6 +16,18 @@ if ($product_id > 0) {
     $stmt->execute([$product_id]);
     $product = $stmt->fetch();
 }
+function getMaterialFactor(string $material): float {
+    $material_factors = [
+        'steel' => 1.5,
+        'aluminum' => 1.0,
+        'plastic' => 0.8,
+        'Сталь 45' => 1.5,
+        'Сталь 40Х' => 1.4,
+        'Алюминий' => 1.0
+    ];
+
+    return $material_factors[$material] ?? 1.0;
+}
 
 $cutting_speed = null;
 $feed_rate = null;
@@ -93,20 +105,8 @@ if ($product_id > 0) {
 }
 $calculations = $stmt->fetchAll();
 
-// Функция расчета времени обработки
-function calculateProcessingTime($length, $width, $height, $material) {
-    $volume = $length * $width * $height;
-    $base_time = $volume * 0.1; // Базовое время на единицу объема
+$factor = getMaterialFactor($material);
 
-    $material_factors = [
-        'steel' => 1.5,
-        'aluminum' => 1.0,
-        'plastic' => 0.8
-    ];
-
-    $factor = isset($material_factors[$material]) ? $material_factors[$material] : 1.0;
-    return round($base_time * $factor);
-}
 ?>
 
 <!DOCTYPE html>

@@ -58,8 +58,9 @@ $products = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Изделия | Технологический Калькулятор</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/style.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
@@ -86,24 +87,26 @@ $products = $stmt->fetchAll();
 
         <div class="row">
             <?php foreach ($products as $product): ?>
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo htmlspecialchars($product['name']); ?></h5>
-                        <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
-                        <p class="card-text"><small class="text-muted">Материал: <?php echo htmlspecialchars($product['material']); ?></small></p>
-                        <a href="/calculations.php?product_id=<?php echo $product['id']; ?>" class="btn btn-primary">Расчет параметров</a>
-                        <form method="POST" action="/products.php" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить это изделие?');">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                            <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
-                        </form>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><?php echo htmlspecialchars($product['name']); ?></h5>
+                            <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
+                            <p class="card-text"><small class="text-muted">Материал: <?php echo htmlspecialchars($product['material']); ?></small></p>
+                            <a href="calculations.php?product_id=<?php echo $product['id']; ?>" class="btn btn-primary">Расчет параметров</a>
+                            <form method="POST" action="products.php" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить это изделие?');">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                                <button type="submit" class="btn btn-danger btn-sm" title="Удалить">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
             <?php endforeach; ?>
         </div>
-    </div>
+
 
     <!-- Модальное окно добавления изделия -->
     <div class="modal fade" id="addProductModal" tabindex="-1">
@@ -137,8 +140,7 @@ $products = $stmt->fetchAll();
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/main.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

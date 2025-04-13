@@ -15,6 +15,7 @@ services:
       - "host.docker.internal:host-gateway"
 
   php:
+    container_name: php
     build: .docker
     restart: always
     volumes:

@@ -20,6 +20,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit;
 }
 
+// Удаление изделия
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'delete') {
+    $product_id_to_delete = (int)$_POST['product_id'];
+
+    if ($product_id_to_delete > 0) {
+        try {
+            $pdo->beginTransaction();
+
+            // Удаление расчета
+            $stmt_delete_calc = $pdo->prepare('DELETE FROM calculations WHERE product_id = ?');
+            $stmt_delete_calc->execute([$product_id_to_delete]);
+
+            $stmt_delete_prod = $pdo->prepare('DELETE FROM products WHERE id = ?');
+            $stmt_delete_prod->execute([$product_id_to_delete]);
+
+            $pdo->commit();
+            $_SESSION['success_message'] = 'Изделие и его расчеты успешно удалены.';
+
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            $_SESSION['error_message'] = 'Ошибка при удалении изделия: ' . $e->getMessage();
+        }
+        header('Location: /products.php');
+        exit;
+    }
+}
+
 // Получение списка изделий
 $stmt = $pdo->query('SELECT * FROM products ORDER BY created_at DESC');
 $products = $stmt->fetchAll();
@@ -38,6 +65,16 @@ $products = $stmt->fetchAll();
     <?php include 'includes/header.php'; ?>
 
     <div class="container mt-4">
+        <?php
+        if (isset($_SESSION['success_message'])) {
+            echo '<div class="alert alert-success alert-dismissible fade show" role="alert">' . $_SESSION['success_message'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+            unset($_SESSION['success_message']);
+        }
+        if (isset($_SESSION['error_message'])) {
+            echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">' . $_SESSION['error_message'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+            unset($_SESSION['error_message']);
+        }
+        ?>
         <div class="row">
             <div class="col-md-12 mb-4">
                 <h2>Управление изделиями</h2>
@@ -56,6 +93,11 @@ $products = $stmt->fetchAll();
                         <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
                         <p class="card-text"><small class="text-muted">Материал: <?php echo htmlspecialchars($product['material']); ?></small></p>
                         <a href="/calculations.php?product_id=<?php echo $product['id']; ?>" class="btn btn-primary">Расчет параметров</a>
+                        <form method="POST" action="/products.php" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить это изделие?');">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                            <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -17,11 +17,13 @@ CREATE TABLE products (
 CREATE TABLE calculations (
     id SERIAL PRIMARY KEY,
     product_id INTEGER REFERENCES products(id),
-    length DECIMAL(10,2),
-    width DECIMAL(10,2),
-    height DECIMAL(10,2),
-    weight DECIMAL(10,2),
-    material_thickness DECIMAL(10,2),
-    processing_time INTEGER,
+    material VARCHAR(50),
+    operation_type VARCHAR(50),
+    tool_material VARCHAR(50),
+    cutting_depth DECIMAL(10,2),
+    cutting_speed DECIMAL(10,2),
+    feed_rate DECIMAL(10,2),
+    spindle_speed INTEGER,
+    surface_roughness DECIMAL(10,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

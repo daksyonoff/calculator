@@ -17,20 +17,63 @@ if ($product_id > 0) {
     $product = $stmt->fetch();
 }
 
+$cutting_speed = null;
+$feed_rate = null;
+$spindle_speed = null;
+$surface_roughness = null;
+$cutting_depth = isset($_POST['cutting_depth']) ? floatval($_POST['cutting_depth']) : 0;
+$operation_type = $_POST['operation_type'] ?? '';
+$material = $_POST['material'] ?? '';
+$tool_material = $_POST['tool_material'] ?? '';
+
+
+if ($cutting_depth > 0) {
+    if ($operation_type === 'Точение') {
+        if ($material === 'Сталь 45' && $tool_material === 'Т15К6') {
+            $cutting_speed = 120 * pow((20 / $cutting_depth), 0.15);
+            $feed_rate = 0.25;
+        } elseif ($material === 'Сталь 40Х' && $tool_material === 'Т15К6') {
+            $cutting_speed = 100 * pow((20 / $cutting_depth), 0.15);
+            $feed_rate = 0.2;
+        } elseif ($material === 'Алюминий' && $tool_material === 'ВК8') {
+            $cutting_speed = 300 * pow((20 / $cutting_depth), 0.15);
+            $feed_rate = 0.15;
+        }
+    } elseif ($operation_type === 'Фрезерование') {
+        if ($material === 'Сталь 45' && $tool_material === 'Р6М5') {
+            $cutting_speed = 35 * pow((20 / $cutting_depth), 0.15);
+            $feed_rate = 0.1;
+        }
+    }
+
+    if ($cutting_speed !== null) {
+        $diameter = 100;
+        $spindle_speed = round((1000 * $cutting_speed) / (M_PI * $diameter));
+    }
+
+    if ($feed_rate !== null) {
+        $surface_roughness = $feed_rate * 20;
+    }
+}
+
 // Обработка формы расчета
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product) {
-    $length = floatval($_POST['length']);
-    $width = floatval($_POST['width']);
-    $height = floatval($_POST['height']);
-    $material_thickness = floatval($_POST['material_thickness']);
-    $weight = floatval($_POST['weight']);
+    $stmt = $pdo->prepare('INSERT INTO calculations (
+        product_id, material, operation_type, tool_material, cutting_depth,
+        cutting_speed, feed_rate, spindle_speed, surface_roughness
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
 
-    // Расчет времени обработки
-    $processing_time = calculateProcessingTime($length, $width, $height, $product['material']);
-
-    // Сохранение расчета
-    $stmt = $pdo->prepare('INSERT INTO calculations (product_id, length, width, height, weight, material_thickness, processing_time) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    $stmt->execute([$product_id, $length, $width, $height, $weight, $material_thickness, $processing_time]);
+    $stmt->execute([
+        $product_id ?: null,
+        $material,
+        $operation_type,
+        $tool_material,
+        $cutting_depth,
+        $cutting_speed,
+        $feed_rate,
+        $spindle_speed,
+        $surface_roughness
+    ]);
 
     $success = 'Расчет успешно сохранен';
 }
@@ -97,24 +140,34 @@ function calculateProcessingTime($length, $width, $height, $material) {
                     <div class="card-body">
                         <form method="POST" id="calculator-form" class="needs-validation" novalidate>
                             <div class="mb-3">
-                                <label for="length" class="form-label">Длина (мм)</label>
-                                <input type="number" step="0.01" class="form-control" id="length" name="length" required>
+                                <label for="operation_type" class="form-label">Тип операции</label>
+                                <select class="form-control" id="operation_type" name="operation_type" required>
+                                    <option value="">Выберите</option>
+                                    <option value="Точение">Точение</option>
+                                    <option value="Фрезерование">Фрезерование</option>
+                                </select>
                             </div>
                             <div class="mb-3">
-                                <label for="width" class="form-label">Ширина (мм)</label>
-                                <input type="number" step="0.01" class="form-control" id="width" name="width" required>
+                                <label for="material" class="form-label">Материал</label>
+                                <select class="form-control" id="material" name="material" required>
+                                    <option value="">Выберите</option>
+                                    <option value="Сталь 45">Сталь 45</option>
+                                    <option value="Сталь 40Х">Сталь 40Х</option>
+                                    <option value="Алюминий">Алюминий</option>
+                                </select>
                             </div>
                             <div class="mb-3">
-                                <label for="height" class="form-label">Высота (мм)</label>
-                                <input type="number" step="0.01" class="form-control" id="height" name="height" required>
+                                <label for="tool_material" class="form-label">Инструмент</label>
+                                <select class="form-control" id="tool_material" name="tool_material" required>
+                                    <option value="">Выберите</option>
+                                    <option value="Т15К6">Т15К6</option>
+                                    <option value="ВК8">ВК8</option>
+                                    <option value="Р6М5">Р6М5</option>
+                                </select>
                             </div>
                             <div class="mb-3">
-                                <label for="material_thickness" class="form-label">Толщина материала (мм)</label>
-                                <input type="number" step="0.01" class="form-control" id="material_thickness" name="material_thickness" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="weight" class="form-label">Вес (кг)</label>
-                                <input type="number" step="0.01" class="form-control" id="weight" name="weight" required>
+                                <label for="cutting_depth" class="form-label">Глубина резания (мм)</label>
+                                <input type="number" step="0.01" class="form-control" id="cutting_depth" name="cutting_depth" required>
                             </div>
                             <button type="submit" class="btn btn-primary">Рассчитать</button>
                         </form>
@@ -133,19 +186,25 @@ function calculateProcessingTime($length, $width, $height, $material) {
                             <table class="table table-striped">
                                 <thead>
                                 <tr>
-                                    <th>Дата</th>
-                                    <th>Изделие</th>
-                                    <th>Размеры (мм)</th>
-                                    <th>Время обработки (мин)</th>
+                                    <th>Операция</th>
+                                    <th>Инструмент</th>
+                                    <th>Глубина<br>(мм)</th>
+                                    <th>Скорость<br>(м/мин)</th>
+                                    <th>Подача<br>(мм/об)</th>
+                                    <th>Шпиндель<br>(об/мин)</th>
+                                    <th>Ra<br>(мкм)</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <?php foreach ($calculations as $calc): ?>
                                     <tr>
-                                        <td><?php echo date('d.m.Y H:i', strtotime($calc['created_at'])); ?></td>
-                                        <td><?php echo htmlspecialchars($calc['product_name'] ?? 'Не указано'); ?></td>
-                                        <td><?php echo $calc['length'] . 'x' . $calc['width'] . 'x' . $calc['height']; ?></td>
-                                        <td><?php echo $calc['processing_time']; ?></td>
+                                        <td><?= htmlspecialchars($calc['operation_type']) ?></td>
+                                        <td><?= htmlspecialchars($calc['tool_material']) ?></td>
+                                        <td><?= htmlspecialchars($calc['cutting_depth']) ?></td>
+                                        <td><?= htmlspecialchars($calc['cutting_speed']) ?></td>
+                                        <td><?= htmlspecialchars($calc['feed_rate']) ?></td>
+                                        <td><?= htmlspecialchars($calc['spindle_speed']) ?></td>
+                                        <td><?= htmlspecialchars($calc['surface_roughness']) ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                                 </tbody>
@@ -161,6 +220,6 @@ function calculateProcessingTime($length, $width, $height, $material) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/main.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>

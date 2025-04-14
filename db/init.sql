@@ -27,3 +27,13 @@ CREATE TABLE calculations (
     surface_roughness DECIMAL(10,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE cutting_modes (
+    id SERIAL PRIMARY KEY,
+    material VARCHAR(255),
+    operation_type VARCHAR(255),
+    tool_material VARCHAR(255),
+    recommended_speed NUMERIC,
+    recommended_feed NUMERIC,
+    recommended_depth NUMERIC
+);

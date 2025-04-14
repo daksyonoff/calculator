@@ -27,6 +27,9 @@ require_once '../config/database.php';
                     <li class="nav-item">
                         <a class="nav-link" href="calculations.php">Расчеты</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="guide.php">Справочник</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <?php if(isset($_SESSION['user_id'])): ?>

@@ -35,17 +35,28 @@ $pdo = require_once '../config/database.php';
                     <table class="table table-striped">
                         <thead>
                         <tr>
+                            <th>Материал</th>
                             <th>Операция</th>
                             <th>Инструмент</th>
-                            <th>Глубина<br>(мм)</th>
-                            <th>Скорость<br>(м/мин)</th>
-                            <th>Подача<br>(мм/об)</th>
-                            <th>Шпиндель<br>(об/мин)</th>
-                            <th>Ra<br>(мкм)</th>
+                            <th>Скорость (м/мин)</th>
+                            <th>Подача (мм/об)</th>
+                            <th>Глубина (мм)</th>
                         </tr>
                         </thead>
                         <tbody>
-
+                        <?php
+                        $stmt = $pdo->query('SELECT * FROM cutting_modes ORDER BY material, operation_type');
+                        while ($row = $stmt->fetch()) {
+                            echo "<tr>";
+                            echo "<td>" . htmlspecialchars($row['material']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['operation_type']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['tool_material']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['recommended_speed']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['recommended_feed']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['recommended_depth']) . "</td>";
+                            echo "</tr>";
+                        }
+                        ?>
                         </tbody>
                     </table>
                 </div>

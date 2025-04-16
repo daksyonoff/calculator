@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Добавление нового изделия
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'], $_POST['description'], $_POST['material'])) {
     $name = $_POST['name'];
     $description = $_POST['description'];
     $material = $_POST['material'];
@@ -21,14 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Удаление изделия
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'delete') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
     $product_id_to_delete = (int)$_POST['product_id'];
 
     if ($product_id_to_delete > 0) {
         try {
             $pdo->beginTransaction();
 
-            // Удаление расчета
             $stmt_delete_calc = $pdo->prepare('DELETE FROM calculations WHERE product_id = ?');
             $stmt_delete_calc->execute([$product_id_to_delete]);
 
@@ -37,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
             $pdo->commit();
             $_SESSION['success_message'] = 'Изделие и его расчеты успешно удалены.';
-
         } catch (PDOException $e) {
             $pdo->rollBack();
             $_SESSION['error_message'] = 'Ошибка при удалении изделия: ' . $e->getMessage();

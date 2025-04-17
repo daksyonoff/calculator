@@ -128,9 +128,11 @@ $products = $stmt->fetchAll();
                         <div class="mb-3">
                             <label for="material" class="form-label">Материал</label>
                             <select class="form-select" id="material" name="material" required>
-                                <option value="steel">Сталь</option>
-                                <option value="aluminum">Алюминий</option>
-                                <option value="plastic">Пластик</option>
+                                <option value="Сталь 45">Сталь 45</option>
+                                <option value="Алюминий">Алюминий</option>
+                                <option value="Сталь 40Х">Сталь 40Х</option>
+                                <option value="Чугун">Чугун</option>
+                                <option value="Бронза">Бронза</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Сохранить</button>

@@ -18,76 +18,100 @@ if ($product_id > 0) {
 }
 function getMaterialFactor(string $material): float {
     $material_factors = [
-        'steel' => 1.5,
-        'aluminum' => 1.0,
-        'plastic' => 0.8,
         'Сталь 45' => 1.5,
         'Сталь 40Х' => 1.4,
-        'Алюминий' => 1.0
+        'Алюминий' => 1.0,
+        'Чугун' => 1.3,
+        'Бронза' => 1.2
     ];
 
     return $material_factors[$material] ?? 1.0;
 }
 
+
+$operations = [
+    'Точение' => [
+        'Сталь 45' => [
+            'Т15К6' => ['speed' => 120, 'feed' => 0.25],
+        ],
+        'Сталь 40Х' => [
+            'Т15К6' => ['speed' => 100, 'feed' => 0.2],
+        ],
+        'Алюминий' => [
+            'ВК8' => ['speed' => 300, 'feed' => 0.15],
+        ],
+        'Чугун' => [
+            'BK8' => ['speed' => 90, 'feed' => 0.25],
+        ],
+        'Бронза' => [
+            'Р6М5' => ['speed' => 120, 'feed' => 0.3],
+        ],
+    ],
+    'Фрезерование' => [
+        'Сталь 45' => [
+            'Р6М5' => ['speed' => 35, 'feed' => 0.1],
+        ],
+        'Чугун' => [
+            'BK8' => ['speed' => 70, 'feed' => 0.2],
+        ],
+        'Бронза' => [
+            'Р6М5' => ['speed' => 90, 'feed' => 0.2],
+        ],
+        'Алюминий' => [
+            'ВК8' => ['speed' => 300, 'feed' => 0.15],
+        ],
+    ],
+];
+
+
+
 $cutting_speed = null;
 $feed_rate = null;
 $spindle_speed = null;
 $surface_roughness = null;
+
+
 $cutting_depth = isset($_POST['cutting_depth']) ? floatval($_POST['cutting_depth']) : 0;
 $operation_type = $_POST['operation_type'] ?? '';
 $material = $_POST['material'] ?? '';
 $tool_material = $_POST['tool_material'] ?? '';
 
+if ($cutting_depth > 0 && isset($operations[$operation_type][$material][$tool_material])) {
+    $base = $operations[$operation_type][$material][$tool_material];
+    $cutting_speed = $base['speed'] * pow((20 / $cutting_depth), 0.15);
+    $feed_rate = $base['feed'];
 
-if ($cutting_depth > 0) {
-    if ($operation_type === 'Точение') {
-        if ($material === 'Сталь 45' && $tool_material === 'Т15К6') {
-            $cutting_speed = 120 * pow((20 / $cutting_depth), 0.15);
-            $feed_rate = 0.25;
-        } elseif ($material === 'Сталь 40Х' && $tool_material === 'Т15К6') {
-            $cutting_speed = 100 * pow((20 / $cutting_depth), 0.15);
-            $feed_rate = 0.2;
-        } elseif ($material === 'Алюминий' && $tool_material === 'ВК8') {
-            $cutting_speed = 300 * pow((20 / $cutting_depth), 0.15);
-            $feed_rate = 0.15;
-        }
-    } elseif ($operation_type === 'Фрезерование') {
-        if ($material === 'Сталь 45' && $tool_material === 'Р6М5') {
-            $cutting_speed = 35 * pow((20 / $cutting_depth), 0.15);
-            $feed_rate = 0.1;
-        }
-    }
+    $diameter = 100;
+    $spindle_speed = round((1000 * $cutting_speed) / (M_PI * $diameter));
 
-    if ($cutting_speed !== null) {
-        $diameter = 100;
-        $spindle_speed = round((1000 * $cutting_speed) / (M_PI * $diameter));
-    }
-
-    if ($feed_rate !== null) {
-        $surface_roughness = $feed_rate * 20;
-    }
+    $surface_roughness = $feed_rate * 20;
 }
+
 
 // Обработка формы расчета
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product) {
-    $stmt = $pdo->prepare('INSERT INTO calculations (
-        product_id, material, operation_type, tool_material, cutting_depth,
-        cutting_speed, feed_rate, spindle_speed, surface_roughness
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    if ($cutting_speed !== null && $feed_rate !== null && $spindle_speed !== null && $surface_roughness !== null) {
+        $stmt = $pdo->prepare('INSERT INTO calculations (
+            product_id, material, operation_type, tool_material, cutting_depth,
+            cutting_speed, feed_rate, spindle_speed, surface_roughness
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
 
-    $stmt->execute([
-        $product_id ?: null,
-        $material,
-        $operation_type,
-        $tool_material,
-        $cutting_depth,
-        $cutting_speed,
-        $feed_rate,
-        $spindle_speed,
-        $surface_roughness
-    ]);
+        $stmt->execute([
+            $product_id ?: null,
+            $material,
+            $operation_type,
+            $tool_material,
+            $cutting_depth,
+            $cutting_speed,
+            $feed_rate,
+            $spindle_speed,
+            $surface_roughness
+        ]);
 
-    $success = 'Расчет успешно сохранен';
+        $success = 'Расчет успешно сохранен';
+    } else {
+        $error = 'Ошибка: параметры не рассчитаны. Проверьте правильность выбора операции, материала и инструмента.';
+    }
 }
 
 // Получение истории расчетов
@@ -154,6 +178,8 @@ $factor = getMaterialFactor($material);
                                     <option value="Сталь 45">Сталь 45</option>
                                     <option value="Сталь 40Х">Сталь 40Х</option>
                                     <option value="Алюминий">Алюминий</option>
+                                    <option value="Чугун">Чугун</option>
+                                    <option value="Бронза">Бронза</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -171,6 +197,18 @@ $factor = getMaterialFactor($material);
                             </div>
                             <button type="submit" class="btn btn-primary">Рассчитать</button>
                         </form>
+                        <?php if ($cutting_speed !== null && $feed_rate !== null && $spindle_speed !== null && $surface_roughness !== null): ?>
+                            <div class="mt-4 alert alert-info">
+                                <h5>Результаты расчета:</h5>
+                                <ul>
+                                    <li><strong>Скорость резания:</strong> <?= round($cutting_speed, 2) ?> м/мин</li>
+                                    <li><strong>Подача:</strong> <?= round($feed_rate, 3) ?> мм/об</li>
+                                    <li><strong>Обороты шпинделя:</strong> <?= round($spindle_speed) ?> об/мин</li>
+                                    <li><strong>Шероховатость поверхности Ra:</strong> <?= round($surface_roughness, 2) ?> мкм</li>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
+
                     </div>
                 </div>
             </div>
@@ -186,6 +224,7 @@ $factor = getMaterialFactor($material);
                             <table class="table table-striped">
                                 <thead>
                                 <tr>
+                                    <th>Изделие</th>
                                     <th>Операция</th>
                                     <th>Инструмент</th>
                                     <th>Глубина<br>(мм)</th>
@@ -198,13 +237,14 @@ $factor = getMaterialFactor($material);
                                 <tbody>
                                 <?php foreach ($calculations as $calc): ?>
                                     <tr>
-                                        <td><?= htmlspecialchars($calc['operation_type']) ?></td>
-                                        <td><?= htmlspecialchars($calc['tool_material']) ?></td>
-                                        <td><?= htmlspecialchars($calc['cutting_depth']) ?></td>
-                                        <td><?= htmlspecialchars($calc['cutting_speed']) ?></td>
-                                        <td><?= htmlspecialchars($calc['feed_rate']) ?></td>
-                                        <td><?= htmlspecialchars($calc['spindle_speed']) ?></td>
-                                        <td><?= htmlspecialchars($calc['surface_roughness']) ?></td>
+                                        <td><?= htmlspecialchars($calc['product_name'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars($calc['operation_type'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars($calc['tool_material'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars($calc['cutting_depth'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars($calc['cutting_speed'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars($calc['feed_rate'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars($calc['spindle_speed'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars($calc['surface_roughness'] ?? '') ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                                 </tbody>

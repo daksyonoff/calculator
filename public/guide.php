@@ -22,6 +22,7 @@ $pdo = require_once '../config/database.php';
         <div class="col-md-3">
             <div class="list-group">
                 <a href="#cutting-modes" class="list-group-item list-group-item-action">Режимы резания</a>
+                <a href="#products" class="list-group-item list-group-item-action">Типовые изделия</a>
                 <a href="#materials" class="list-group-item list-group-item-action">Материалы</a>
                 <a href="#tools" class="list-group-item list-group-item-action">Инструменты</a>
                 <a href="#roughness" class="list-group-item list-group-item-action">Шероховатость</a>
@@ -48,17 +49,103 @@ $pdo = require_once '../config/database.php';
                         $stmt = $pdo->query('SELECT * FROM cutting_modes ORDER BY material, operation_type');
                         while ($row = $stmt->fetch()) {
                             echo "<tr>";
-                            echo "<td>" . htmlspecialchars($row['material']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['operation_type']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['tool_material']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['recommended_speed']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['recommended_feed']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['recommended_depth']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['material'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['operation_type'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['tool_material'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['recommended_speed'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['recommended_feed'] ?? '') . "</td>";
+                            echo "<td>" . htmlspecialchars($row['recommended_depth'] ?? '') . "</td>";
                             echo "</tr>";
                         }
                         ?>
                         </tbody>
                     </table>
+                </div>
+            </section>
+
+            <section id="products" class="mb-5">
+                <h2>Типовые изделия</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>Изделие</th>
+                                    <th>Материал</th>
+                                    <th>Операция</th>
+                                    <th>Инструмент</th>
+                                    <th>Глубина резания (мм)</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>Корпус редуктора</td>
+                                    <td>Сталь 45</td>
+                                    <td>Фрезерование, Точение</td>
+                                    <td>P6M5 (фрезерование), T15K6 (точение)</td>
+                                    <td>3.0 (фрезерование), 2.0 (точение)</td>
+                                </tr>
+                                <tr>
+                                    <td>Вал привода</td>
+                                    <td>Сталь 40Х</td>
+                                    <td>Точение, Фрезерование</td>
+                                    <td>T15K6 (точение), P6M5 (фрезерование)</td>
+                                    <td>1.5 (точение), 2.5 (фрезерование)</td>
+                                </tr>
+                                <tr>
+                                    <td>Крышка подшипника</td>
+                                    <td>Чугун СЧ20</td>
+                                    <td>Фрезерование, Сверление</td>
+                                    <td>BK8</td>
+                                    <td>3.5 (фрезерование)</td>
+                                </tr>
+                                <tr>
+                                    <td>Фланец соединительный</td>
+                                    <td>Сталь 45</td>
+                                    <td>Точение</td>
+                                    <td>T15K6</td>
+                                    <td>2.0</td>
+                                </tr>
+                                <tr>
+                                    <td>Шестерня цилиндрическая</td>
+                                    <td>Сталь 40Х</td>
+                                    <td>Фрезерование, Точение</td>
+                                    <td>P6M5 (фрезерование), T15K6 (точение)</td>
+                                    <td>2.5 (фрезерование), 1.5 (точение)</td>
+                                </tr>
+                                <tr>
+                                    <td>Плита основания</td>
+                                    <td>Чугун СЧ20</td>
+                                    <td>Фрезерование</td>
+                                    <td>BK8</td>
+                                    <td>3.5</td>
+                                </tr>
+                                <tr>
+                                    <td>Кронштейн</td>
+                                    <td>Сталь 35</td>
+                                    <td>Сверление, Фрезерование</td>
+                                    <td>P6M5</td>
+                                    <td>0 (сверление), 2.5 (фрезерование)</td>
+                                </tr>
+                                <tr>
+                                    <td>Поршень компрессора</td>
+                                    <td>Алюминий Д16</td>
+                                    <td>Точение</td>
+                                    <td>BK8</td>
+                                    <td>2.5</td>
+                                </tr>
+                                <tr>
+                                    <td>Корпус насоса</td>
+                                    <td>Бронза БрАЖ9-4</td>
+                                    <td>Точение</td>
+                                    <td>BK8</td>
+                                    <td>2.0</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -108,7 +195,6 @@ $pdo = require_once '../config/database.php';
                 </div>
             </section>
 
-            <!-- Шероховатость -->
             <section id="roughness" class="mb-5">
                 <h2>Шероховатость поверхности</h2>
                 <div class="card">

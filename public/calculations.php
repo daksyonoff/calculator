@@ -133,13 +133,33 @@ $factor = getMaterialFactor($material);
 
 ?>
 
+<?php
+if (isset($_POST['delete_calculation'])) {
+    $calculation_id = (int)$_POST['calculation_id'];
+
+    if ($calculation_id > 0) {
+        try {
+            $stmt_delete_calculation = $pdo->prepare('DELETE FROM calculations WHERE id = ?');
+            $stmt_delete_calculation->execute([$calculation_id]);
+
+            $_SESSION['success_message'] = 'Расчет успешно удален.';
+        } catch (PDOException $e) {
+            $_SESSION['error_message'] = 'Ошибка при удалении расчета: ' . $e->getMessage();
+        }
+        header('Location: /calculations.php');
+        exit;
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>История расчетов | Технологический Калькулятор</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -245,7 +265,18 @@ $factor = getMaterialFactor($material);
                                         <td><?= htmlspecialchars($calc['feed_rate'] ?? '') ?></td>
                                         <td><?= htmlspecialchars($calc['spindle_speed'] ?? '') ?></td>
                                         <td><?= htmlspecialchars($calc['surface_roughness'] ?? '') ?></td>
+                                        <td>
+                                        <form method="POST" style="display:inline;">
+                                            <input type="hidden" name="calculation_id" value="<?= htmlspecialchars($calc['id']) ?>">
+                                            <button type="submit" name="delete_calculation" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Вы уверены, что хотите удалить этот расчет?');"
+                                                    title="Удалить расчет">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                        </td>
                                     </tr>
+
                                 <?php endforeach; ?>
                                 </tbody>
                             </table>

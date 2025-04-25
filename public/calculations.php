@@ -15,6 +15,7 @@ if ($product_id > 0) {
     $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
     $stmt->execute([$product_id]);
     $product = $stmt->fetch();
+
 }
 function getMaterialFactor(string $material): float {
     $material_factors = [
@@ -65,32 +66,33 @@ $operations = [
 
 
 
-$cutting_speed = null;
-$feed_rate = null;
-$spindle_speed = null;
-$surface_roughness = null;
-
-
+$cutting_speed = $feed_rate = $spindle_speed = $surface_roughness = null;
 $cutting_depth = isset($_POST['cutting_depth']) ? floatval($_POST['cutting_depth']) : 0;
 $operation_type = $_POST['operation_type'] ?? '';
 $material = $_POST['material'] ?? '';
 $tool_material = $_POST['tool_material'] ?? '';
 
-if ($cutting_depth > 0 && isset($operations[$operation_type][$material][$tool_material])) {
-    $base = $operations[$operation_type][$material][$tool_material];
-    $cutting_speed = $base['speed'] * pow((20 / $cutting_depth), 0.15);
-    $feed_rate = $base['feed'];
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['calculate'])) {
 
-    $diameter = 100;
-    $spindle_speed = round((1000 * $cutting_speed) / (M_PI * $diameter));
+    if ($cutting_depth > 0 && isset($operations[$operation_type][$material][$tool_material])) {
+        $base = $operations[$operation_type][$material][$tool_material];
+        $cutting_speed = $base['speed'] * pow((20 / $cutting_depth), 0.15);
+        $feed_rate = $base['feed'];
 
-    $surface_roughness = $feed_rate * 20;
+        $diameter = 100;
+        $spindle_speed = round((1000 * $cutting_speed) / (M_PI * $diameter));
+
+        $surface_roughness = $feed_rate * 20;
+    } else {
+        $_SESSION['error_message'] = 'Ошибка: параметры не рассчитаны. Проверьте правильность выбора операции, материала и инструмента.';
+    }
 }
 
 
 // Обработка формы расчета
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product) {
-    if ($cutting_speed !== null && $feed_rate !== null && $spindle_speed !== null && $surface_roughness !== null) {
+    if ($cutting_speed !== null && $feed_rate !== null && $spindle_speed !== null && $surface_roughness !== null)
+    try {
         $stmt = $pdo->prepare('INSERT INTO calculations (
             product_id, material, operation_type, tool_material, cutting_depth,
             cutting_speed, feed_rate, spindle_speed, surface_roughness
@@ -108,12 +110,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product) {
             $surface_roughness
         ]);
 
-        $success = 'Расчет успешно сохранен';
-    } else {
-        $error = 'Ошибка: параметры не рассчитаны. Проверьте правильность выбора операции, материала и инструмента.';
+        $_SESSION['success_message'] = 'Расчет успешно сохранен';
+    } catch (PDOException $e) {
+        $_SESSION['error_message'] = 'Ошибка при сохранении расчета: ' . $e->getMessage();
     }
 }
 
+
+
+if (isset($_POST['delete_calculation'])) {
+    $calculation_id = (int)$_POST['calculation_id'];
+
+    if ($calculation_id > 0) {
+        try {
+            $stmt_delete_calculation = $pdo->prepare('DELETE FROM calculations WHERE id = ?');
+            $stmt_delete_calculation->execute([$calculation_id]);
+
+            $_SESSION['success_message'] = 'Расчет успешно удален.';
+        } catch (PDOException $e) {
+            $_SESSION['error_message'] = 'Ошибка при удалении расчета: ' . $e->getMessage();
+        }
+        header('Location: /calculations.php?product_id=' . $product_id);
+        exit;
+    }
+}
 // Получение истории расчетов
 $calculations = [];
 if ($product_id > 0) {
@@ -133,25 +153,6 @@ $factor = getMaterialFactor($material);
 
 ?>
 
-<?php
-if (isset($_POST['delete_calculation'])) {
-    $calculation_id = (int)$_POST['calculation_id'];
-
-    if ($calculation_id > 0) {
-        try {
-            $stmt_delete_calculation = $pdo->prepare('DELETE FROM calculations WHERE id = ?');
-            $stmt_delete_calculation->execute([$calculation_id]);
-
-            $_SESSION['success_message'] = 'Расчет успешно удален.';
-        } catch (PDOException $e) {
-            $_SESSION['error_message'] = 'Ошибка при удалении расчета: ' . $e->getMessage();
-        }
-        header('Location: /calculations.php');
-        exit;
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -163,6 +164,7 @@ if (isset($_POST['delete_calculation'])) {
     <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
+
 <?php include 'includes/header.php'; ?>
 
 <div class="container mt-4">
@@ -170,10 +172,17 @@ if (isset($_POST['delete_calculation'])) {
         <h2>Расчет параметров: <?php echo htmlspecialchars($product['name']); ?></h2>
     <?php endif; ?>
 
-    <?php if (isset($success)): ?>
-        <div class="alert alert-success"><?php echo $success; ?></div>
+    <?php if (isset($_SESSION['success_message'])): ?>
+        <div class="alert alert-success"><?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?></div>
     <?php endif; ?>
-
+    <?php if (isset($_SESSION['error_message'])): ?>
+        <div class="alert alert-danger"><?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?></div>
+    <?php endif; ?>
+    <div class="container mt-4">
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill" style="font-size: 1.5em; color: #f39c12; margin-right: 10px;"></i>
+            <p>Эти расчеты основаны на теоретических значениях и предназначены только для учебных целей. Фактические результаты будут отличаться.</p>
+        </div>
     <div class="row">
         <?php if ($product): ?>
             <div class="col-md-6">
@@ -182,7 +191,8 @@ if (isset($_POST['delete_calculation'])) {
                         <h5 class="card-title mb-0">Параметры расчета</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" id="calculator-form" class="needs-validation" novalidate>
+                        <form method="POST" action="" id="calculator-form" class="needs-validation" novalidate>
+                            <input type="hidden" name="calculate" value="1">
                             <div class="mb-3">
                                 <label for="operation_type" class="form-label">Тип операции</label>
                                 <select class="form-control" id="operation_type" name="operation_type" required>
@@ -233,7 +243,7 @@ if (isset($_POST['delete_calculation'])) {
                 </div>
             </div>
         <?php endif; ?>
-        <div class="<?php echo $product ? 'col-md-6' : 'col-md-12'; ?>">
+            <div class="<?php echo $product ? 'col-md-6' : 'col-md-12'; ?>">
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">История расчетов</h5>

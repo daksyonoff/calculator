@@ -105,9 +105,6 @@ $products = $stmt->fetchAll();
                 </div>
             <?php endforeach; ?>
         </div>
-
-
-    <!-- Модальное окно добавления изделия -->
     <div class="modal fade" id="addProductModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">

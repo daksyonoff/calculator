@@ -33,33 +33,33 @@ function getMaterialFactor(string $material): float {
 $operations = [
     'Точение' => [
         'Сталь 45' => [
-            'Т15К6' => ['speed' => 120, 'feed' => 0.25],
+            'T15K6' => ['speed' => 120, 'feed' => 0.25],
         ],
         'Сталь 40Х' => [
-            'Т15К6' => ['speed' => 100, 'feed' => 0.2],
+            'T15K6' => ['speed' => 100, 'feed' => 0.2],
         ],
         'Алюминий' => [
-            'ВК8' => ['speed' => 300, 'feed' => 0.15],
+            'BK8' => ['speed' => 300, 'feed' => 0.15],
         ],
         'Чугун' => [
             'BK8' => ['speed' => 90, 'feed' => 0.25],
         ],
         'Бронза' => [
-            'Р6М5' => ['speed' => 120, 'feed' => 0.3],
+            'BK8' => ['speed' => 110, 'feed' => 0.25],
         ],
     ],
     'Фрезерование' => [
         'Сталь 45' => [
-            'Р6М5' => ['speed' => 35, 'feed' => 0.1],
+            'P6M5' => ['speed' => 35, 'feed' => 0.1],
         ],
         'Чугун' => [
             'BK8' => ['speed' => 70, 'feed' => 0.2],
         ],
         'Бронза' => [
-            'Р6М5' => ['speed' => 90, 'feed' => 0.2],
+            'P6M5' => ['speed' => 90, 'feed' => 0.2],
         ],
         'Алюминий' => [
-            'ВК8' => ['speed' => 300, 'feed' => 0.15],
+            'BK8' => ['speed' => 300, 'feed' => 0.15],
         ],
     ],
 ];
@@ -159,8 +159,8 @@ $factor = getMaterialFactor($material);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>История расчетов | Технологический Калькулятор</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href=" https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css " rel="stylesheet">
+    <link href=" https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css " rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -216,9 +216,9 @@ $factor = getMaterialFactor($material);
                                 <label for="tool_material" class="form-label">Инструмент</label>
                                 <select class="form-control" id="tool_material" name="tool_material" required>
                                     <option value="">Выберите</option>
-                                    <option value="Т15К6">Т15К6</option>
-                                    <option value="ВК8">ВК8</option>
-                                    <option value="Р6М5">Р6М5</option>
+                                    <option value="T15K6">T15K6</option>
+                                    <option value="BK8">BK8</option>
+                                    <option value="P6M5">P6M5</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -300,7 +300,7 @@ $factor = getMaterialFactor($material);
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src=" https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js "></script>
 <script src="js/main.js"></script>
 </body>
 </html>

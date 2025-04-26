@@ -9,7 +9,7 @@ $pdo = require_once '../config/database.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Справочник технолога-машиностроителя | Техно Калькулятор</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href=" https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css " rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -98,7 +98,7 @@ $pdo = require_once '../config/database.php';
                                     <td>Чугун СЧ20</td>
                                     <td>Фрезерование, Сверление</td>
                                     <td>BK8</td>
-                                    <td>3.5 (фрезерование)</td>
+                                    <td>3.5 (фрезерование), Ø8 (сверление)</td>
                                 </tr>
                                 <tr>
                                     <td>Фланец соединительный</td>
@@ -126,7 +126,7 @@ $pdo = require_once '../config/database.php';
                                     <td>Сталь 35</td>
                                     <td>Сверление, Фрезерование</td>
                                     <td>P6M5</td>
-                                    <td>0 (сверление), 2.5 (фрезерование)</td>
+                                    <td>Ø10 (сверление), 2.5 (фрезерование)</td>
                                 </tr>
                                 <tr>
                                     <td>Поршень компрессора</td>
@@ -240,6 +240,6 @@ $pdo = require_once '../config/database.php';
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src=" https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js "></script>
 </body>
 </html>

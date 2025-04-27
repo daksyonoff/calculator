@@ -76,13 +76,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['calculate'])) {
 
     if ($cutting_depth > 0 && isset($operations[$operation_type][$material][$tool_material])) {
         $base = $operations[$operation_type][$material][$tool_material];
-        $cutting_speed = $base['speed'] * pow((20 / $cutting_depth), 0.15);
+        $factor = getMaterialFactor($material);
+
+        $cutting_speed = $base['speed'] * $factor * pow((20 / $cutting_depth), 0.15);
         $feed_rate = $base['feed'];
 
-        $diameter = 100;
+        $diameter = isset($_POST['diameter']) ? floatval($_POST['diameter']) : 100;
         $spindle_speed = round((1000 * $cutting_speed) / (M_PI * $diameter));
 
-        $surface_roughness = $feed_rate * 20;
+        $tool_radius = isset($_POST['tool_radius']) ? floatval($_POST['tool_radius']) : 0.8;
+        $surface_roughness = ($feed_rate ** 2) / (8 * $tool_radius);
     } else {
         $_SESSION['error_message'] = 'Ошибка: параметры не рассчитаны. Проверьте правильность выбора операции, материала и инструмента.';
     }
@@ -220,6 +223,14 @@ $factor = getMaterialFactor($material);
                                     <option value="BK8">BK8</option>
                                     <option value="P6M5">P6M5</option>
                                 </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="diameter" class="form-label">Диаметр детали (мм)</label>
+                                <input type="number" step="0.1" class="form-control" id="diameter" name="diameter" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tool_radius" class="form-label">Радиус инструмента (мм)</label>
+                                <input type="number" step="0.01" class="form-control" id="tool_radius" name="tool_radius" required>
                             </div>
                             <div class="mb-3">
                                 <label for="cutting_depth" class="form-label">Глубина резания (мм)</label>

@@ -45,19 +45,78 @@ $pdo = require_once '../config/database.php';
                         </tr>
                         </thead>
                         <tbody>
-                        <?php
-                        $stmt = $pdo->query('SELECT * FROM cutting_modes ORDER BY material, operation_type');
-                        while ($row = $stmt->fetch()) {
-                            echo "<tr>";
-                            echo "<td>" . htmlspecialchars($row['material'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['operation_type'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['tool_material'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['recommended_speed'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['recommended_feed'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['recommended_depth'] ?? '') . "</td>";
-                            echo "</tr>";
-                        }
-                        ?>
+                        <tr>
+                            <td>Сталь 45</td>
+                            <td>Точение</td>
+                            <td>T15K6</td>
+                            <td>120</td>
+                            <td>0.25</td>
+                            <td>2.0</td>
+                        </tr>
+                        <tr>
+                            <td>Сталь 40Х</td>
+                            <td>Точение</td>
+                            <td>T15K6</td>
+                            <td>100</td>
+                            <td>0.20</td>
+                            <td>1.5</td>
+                        </tr>
+                        <tr>
+                            <td>Алюминий Д16</td>
+                            <td>Точение</td>
+                            <td>BK8</td>
+                            <td>300</td>
+                            <td>0.15</td>
+                            <td>2.5</td>
+                        </tr>
+                        <tr>
+                            <td>Чугун СЧ20</td>
+                            <td>Точение</td>
+                            <td>BK8</td>
+                            <td>90</td>
+                            <td>0.25</td>
+                            <td>2.0</td>
+                        </tr>
+                        <tr>
+                            <td>Бронза БрАЖ9-4</td>
+                            <td>Точение</td>
+                            <td>BK8</td>
+                            <td>110</td>
+                            <td>0.25</td>
+                            <td>2.0</td>
+                        </tr>
+                        <tr>
+                            <td>Сталь 45</td>
+                            <td>Фрезерование</td>
+                            <td>P6M5</td>
+                            <td>35</td>
+                            <td>0.10</td>
+                            <td>3.0</td>
+                        </tr>
+                        <tr>
+                            <td>Чугун СЧ20</td>
+                            <td>Фрезерование</td>
+                            <td>BK8</td>
+                            <td>70</td>
+                            <td>0.20</td>
+                            <td>3.5</td>
+                        </tr>
+                        <tr>
+                            <td>Бронза БрАЖ9-4</td>
+                            <td>Фрезерование</td>
+                            <td>P6M5</td>
+                            <td>90</td>
+                            <td>0.20</td>
+                            <td>2.5</td>
+                        </tr>
+                        <tr>
+                            <td>Алюминий Д16</td>
+                            <td>Фрезерование</td>
+                            <td>BK8</td>
+                            <td>300</td>
+                            <td>0.15</td>
+                            <td>3.0</td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>

@@ -37,7 +37,7 @@ services:
       - app_network
 
   postgres:
-    container_name: postgres_container
+    container_name: postgres
     image: postgres
     environment:
       POSTGRES_DB: calculator

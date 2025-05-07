@@ -1,2 +1,22 @@
+# IDE
 .idea
+
+# Environment
 .env
+.env.backup
+.env.production
+auth.json
+
+# Composer
+/vendor/
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# PHPUnit
+.phpunit.result.cache
+
+# Phpactor
+.phpactor.json

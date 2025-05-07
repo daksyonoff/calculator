@@ -29,10 +29,15 @@ services:
       - "host.docker.internal:host-gateway"
 
   composer:
-    image: composer
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
     volumes:
-      - .:/app
-    command: install
+      - .:/var/www/html
+    working_dir: /var/www/html
+    command: composer install
+    depends_on:
+      - php
     networks:
       - app_network
 

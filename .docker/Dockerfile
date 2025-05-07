@@ -7,9 +7,14 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     unzip \
+    git \
     && docker-php-ext-install -j$(nproc) zip pgsql pdo_pgsql \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug
+
+RUN curl -sS https://getcomposer.org/installer | php \
+    && mv composer.phar /usr/local/bin/composer
+
 
 WORKDIR /var/www/html
 
